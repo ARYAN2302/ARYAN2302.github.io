@@ -1,0 +1,197 @@
+{
+  "model": "v11_lejepa_hierarchical_supcon",
+  "best_epoch": 5,
+  "overall": {
+    "n_holdout_drones": 3659,
+    "n_matched_bg": 3659,
+    "n_random_bg": 50000,
+    "matched_bg_auc": 0.9784623582370282,
+    "random_bg_auc": 1.0,
+    "drone_mean_dist": 23.233091724219385,
+    "matched_bg_mean_dist": 37.65100649213743,
+    "random_bg_mean_dist": 51.65948881826934,
+    "bg_drone_ratio": 1.6205766730946125
+  },
+  "per_pair": {
+    "n_pairs": 3659,
+    "drone_closer_count": 3590,
+    "bg_closer_count": 69,
+    "bg_closer_pct": 1.8857611369226566
+  },
+  "per_type": {
+    "DJI FPV COMBO": {
+      "n_samples": 1674,
+      "matched_auc": 0.9673697006742347,
+      "random_auc": 1.0,
+      "drone_mean_dist": 24.96730580067853,
+      "bg_drone_ratio": 1.5080123899918025
+    },
+    "FUTABA-T10J": {
+      "n_samples": 453,
+      "matched_auc": 0.998404249221883,
+      "random_auc": 1.0,
+      "drone_mean_dist": 20.74705275273057,
+      "bg_drone_ratio": 1.8147640988275833
+    },
+    "FUTABA-T14SG": {
+      "n_samples": 679,
+      "matched_auc": 0.965579656915524,
+      "random_auc": 1.0,
+      "drone_mean_dist": 24.41684664779748,
+      "bg_drone_ratio": 1.5420093771827712
+    },
+    "JR PROPO XG7": {
+      "n_samples": 216,
+      "matched_auc": 0.999733027643659,
+      "random_auc": 1.0,
+      "drone_mean_dist": 21.985916994189232,
+      "bg_drone_ratio": 1.7125056235811498
+    },
+    "JUMPER-T14": {
+      "n_samples": 251,
+      "matched_auc": 0.9998758722965476,
+      "random_auc": 1.0,
+      "drone_mean_dist": 20.266519748635204,
+      "bg_drone_ratio": 1.8577933931983035
+    },
+    "RadioMaster BOXER": {
+      "n_samples": 244,
+      "matched_auc": 1.0,
+      "random_auc": 1.0,
+      "drone_mean_dist": 19.854415440555854,
+      "bg_drone_ratio": 1.8963543200183652
+    },
+    "WFLY ET10": {
+      "n_samples": 142,
+      "matched_auc": 1.0,
+      "random_auc": 1.0,
+      "drone_mean_dist": 18.005824243616118,
+      "bg_drone_ratio": 2.0910459850504437
+    }
+  },
+  "artifact_check": {
+    "matched_vs_random_auc": 0.9246378955998908,
+    "matched_vs_random_probe": 0.9998509075999852,
+    "cosine_sim_centroids": 0.7865626811981201,
+    "verdict": "inflated"
+  },
+  "manufacturer_clustering": {
+    "overall_type_silhouette": 0.4883612394332886,
+    "manufacturer_level_silhouette": 0.053476687520742416,
+    "per_manufacturer": {
+      "DAUTEL": {
+        "n_types": 1,
+        "n_samples": 355,
+        "silhouette": null
+      },
+      "DEVENTION": {
+        "n_types": 1,
+        "n_samples": 314,
+        "silhouette": null
+      },
+      "DJI": {
+        "n_types": 4,
+        "n_samples": 4813,
+        "silhouette": 0.7865056395530701,
+        "knn_cv": 0.9987535056439897
+      },
+      "FLYSKY": {
+        "n_types": 3,
+        "n_samples": 1121,
+        "silhouette": 0.6072238683700562,
+        "knn_cv": 0.9982174688057041
+      },
+      "FRSKY": {
+        "n_types": 3,
+        "n_samples": 841,
+        "silhouette": 0.5753834247589111,
+        "knn_cv": 0.9988095238095238
+      },
+      "FUTABA": {
+        "n_types": 2,
+        "n_samples": 1089,
+        "silhouette": 0.05310610309243202,
+        "knn_cv": 0.9972426470588236
+      },
+      "HERELINK-HX4": {
+        "n_types": 1,
+        "n_samples": 255,
+        "silhouette": null
+      },
+      "JR": {
+        "n_types": 1,
+        "n_samples": 369,
+        "silhouette": null
+      },
+      "JUMPER-TPROV2": {
+        "n_types": 1,
+        "n_samples": 249,
+        "silhouette": null
+      },
+      "RADIOLINK": {
+        "n_types": 2,
+        "n_samples": 579,
+        "silhouette": 0.08440794795751572,
+        "knn_cv": 0.8411347094618781
+      },
+      "RADIOMASTER": {
+        "n_types": 1,
+        "n_samples": 211,
+        "silhouette": null
+      },
+      "SIYI": {
+        "n_types": 3,
+        "n_samples": 1880,
+        "silhouette": 0.6071414351463318,
+        "knn_cv": 0.9968085088313775
+      },
+      "SKYDROID-H12": {
+        "n_types": 1,
+        "n_samples": 271,
+        "silhouette": null
+      },
+      "SKYDROID-T10": {
+        "n_types": 1,
+        "n_samples": 167,
+        "silhouette": null
+      },
+      "WFLY": {
+        "n_types": 2,
+        "n_samples": 218,
+        "silhouette": 0.7718910574913025,
+        "knn_cv": 1.0
+      },
+      "YUNZHUO-H12": {
+        "n_types": 1,
+        "n_samples": 93,
+        "silhouette": null
+      },
+      "YUNZHUO-H16": {
+        "n_types": 1,
+        "n_samples": 184,
+        "silhouette": null
+      },
+      "YUNZHUO-H30": {
+        "n_types": 1,
+        "n_samples": 432,
+        "silhouette": null
+      }
+    }
+  },
+  "threshold": {
+    "optimal_mahalanobis": 27.420137913489096,
+    "tpr_at_optimal": 0.8813883574747199,
+    "fpr_at_optimal": 0.056572834107679694
+  },
+  "embedding_quality": {
+    "train_silhouette": 0.4883612394332886,
+    "binary_silhouette": 0.3241070508956909
+  },
+  "comparison": {
+    "v9_matched_auc": 0.3002,
+    "v10_matched_auc": 0.9371,
+    "v11_matched_auc": 0.9784623582370282,
+    "v9_bg_closer_pct": 78.1,
+    "v11_bg_closer_pct": 1.8857611369226566
+  }
+}
