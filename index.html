@@ -295,7 +295,7 @@
 
  <div class="side-by-side">
  <div class="image-container">
- <img src="blog_images/umap_embedding.png" alt="UMAP embedding visualization showing drone and background clusters in 2D space" class="resized">
+ <img src="blog_images/03_umap_polished.png" alt="UMAP embedding visualization showing drone and background clusters in 2D space" class="resized">
  </div>
  <div class="text-container">
  <p>This UMAP projection tells the whole story. After training with hierarchical contrastive learning on 30 drone types, the embedding space separates into two clean regions: a unified drone cluster (colored dots) and a background region (grey). The 7 holdout drone types, never seen during training, fall squarely inside the drone cluster. The model didn't just memorize training types; it discovered the concept of drone-ness.</p>
@@ -435,7 +435,7 @@ threshold = 25.55 # optimal for my validation set</code></pre>
  </ul>
 
  <div class="image-container">
- <img src="blog_images/hierarchical_supcon.png" alt="Diagram showing fine-grained vs coarse-grained contrastive learning: fine creates type-level clusters, coarse merges them into a unified drone region" class="resized60">
+ <img src="blog_images/08_signal_decomposition.png" alt="Diagram showing fine-grained vs coarse-grained contrastive learning: fine creates type-level clusters, coarse merges them into a unified drone region" class="resized60">
  </div>
 
  <p>The weighted combination is:</p>
@@ -546,17 +546,17 @@ print(f"Youden's J = {j_scores[best_idx]:.4f}") # 0.9978</code></pre>
 
  <div class="side-by-side">
  <div class="image-container">
- <img src="blog_images/per_type_auc.png" alt="Per-type AUC bar chart showing all 7 holdout drone types above 0.95 AUC" class="resized">
+ <img src="blog_images/06_radar_chart.png" alt="Per-type AUC bar chart showing all 7 holdout drone types above 0.95 AUC" class="resized">
  </div>
  <div class="image-container">
- <img src="blog_images/roc_curve.png" alt="ROC curves for matched and random background evaluation" class="resized">
+ <img src="blog_images/02_roc_overlay.png" alt="ROC curves for matched and random background evaluation" class="resized">
  </div>
  </div>
 
  <p>The per-type breakdown reveals a clear pattern. Five of the seven types achieve near-perfect detection (AUC >= 0.9984): RadioMaster BOXER (1.0000), WFLY ET10 (1.0000), JUMPER-T14 (0.9999), JR PROPO XG7 (0.9997), and FUTABA-T10J (0.9984). The two weakest types, DJI FPV COMBO (0.9674) and FUTABA-T14SG (0.9656), are still well above the threshold for practical deployment. The DJI FPV COMBO is a digital HD video transmitter that operates in a fundamentally different RF regime than traditional RC controllers, which may explain why it sits closer to the boundary of the drone region.</p>
 
  <div class="image-container">
- <img src="blog_images/training_evolution.png" alt="AUC training evolution showing how detection performance improves across epochs" class="resized60">
+ <img src="blog_images/07_training_evolution.gif" alt="AUC training evolution showing how detection performance improves across epochs" class="resized60">
  </div>
 
  <p>The training evolution curve tells an interesting story. The matched BG AUC rises sharply in the first few epochs as the hierarchical contrastive loss shapes the embedding space, then plateaus. The best checkpoint comes from epoch 5, after which the model starts over-fitting to training-type-specific features that don't transfer to holdout types. This early stopping behavior is a natural consequence of the fine-grained loss, it keeps learning type-specific features long after the coarse-grained loss has established the drone region, and those features eventually hurt generalization.</p>
@@ -575,7 +575,7 @@ print(f"Youden's J = {j_scores[best_idx]:.4f}") # 0.9978</code></pre>
  <p>So the model <em>can</em> detect the difference between matched and random backgrounds. Does this invalidate the drone detection result? Absolutely not, and here's the critical proof:</p>
 
  <div class="image-container">
- <img src="blog_images/artifact_validation.png" alt="Per-pair test diagram showing 98.1% of drones closer to centroid than their matched backgrounds" class="resized60">
+ <img src="blog_images/01_exposure_side_by_side.png" alt="Per-pair test diagram showing 98.1% of drones closer to centroid than their matched backgrounds" class="resized60">
  </div>
 
  <p><strong>The per-pair test is the definitive check.</strong> For each holdout drone, I compare its Mahalanobis distance to the drone centroid against its matched background's distance. If the model were purely detecting artifacts (footprints of the signal-removal process), then matched backgrounds, which contain those artifacts, would be closer to the drone centroid than the holdout drones themselves. But <strong>98.1%</strong> of drones are closer to the centroid than their matched backgrounds. The model is clearly detecting drone signal, not artifacts.</p>
@@ -593,7 +593,7 @@ print(f"Youden's J = {j_scores[best_idx]:.4f}") # 0.9978</code></pre>
  <p><strong>v11 (+ Hierarchical SupCon):</strong> The coarse-grained loss changed everything. Matched BG AUC jumped to 0.9785, the 30 clusters merged into a single drone region, and one-centroid detection finally worked. The improvement isn't just quantitative, it's qualitative. v10 detected drones by checking proximity to any training type. v11 detects drones by checking proximity to the concept of drone-ness itself.</p>
 
  <div class="image-container">
- <img src="blog_images/evolution_comparison.png" alt="v9 vs v10 vs v11 comparison showing the progression from messy embeddings to isolated clusters to unified drone region" class="resized">
+ <img src="blog_images/03b_umap_by_type.png" alt="v9 vs v10 vs v11 comparison showing the progression from messy embeddings to isolated clusters to unified drone region" class="resized">
  </div>
 
  <p>The key lesson: <strong>standard SupCon is wrong for zero-shot detection</strong>. It optimizes for type discrimination, which is the wrong objective when you need type-agnostic detection. Hierarchical SupCon optimizes for both type discrimination (fine-grained loss) and drone-ness grouping (coarse-grained loss), producing an embedding space that serves the detection task without sacrificing feature quality.</p>
