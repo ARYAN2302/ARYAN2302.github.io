@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Proving drone-ness is a learnable RF signal using self-supervised learning. IRIS v11 achieves 0.978 AUC on 7 unseen drone types with one centroid and one threshold.">
-    <title>Drone-ness is Learnable: Self-Supervised RF Signal Detection with One Centroid and One Threshold</title>
+    <meta name="description" content="Zero-shot drone detection on 7 unseen types using hierarchical contrastive learning. One centroid, one threshold, 0.978 AUC.">
+    <title>Zero-Shot Drone Detection from RF Spectrograms with Hierarchical Contrastive Learning</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
     <script>
@@ -251,7 +251,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>Drone-ness is Learnable: Self-Supervised RF Signal Detection with One Centroid and One Threshold</h1>
+        <h1>Zero-Shot Drone Detection from RF Spectrograms with Hierarchical Contrastive Learning</h1>
 
         <div class="author-info">
             <div class="social-links">
@@ -263,10 +263,10 @@
 
         <p>Drones are everywhere. Airports, prisons, military bases, they all need to detect RF signals from drone controllers. The standard approach is to collect labeled data for known drone types, train a classifier, and deploy. This works until a new drone controller hits the market and your classifier has no idea what it is. You'd need new labeled data, retraining, redeployment. This doesn't scale.</p>
 
-        <p>I wanted to answer a different question: <em>is "drone-ness" a real, learnable signal?</em> Is there something in the RF spectrum that all drone controllers share, that a model could discover on its own, without being told which drone is which? No flight-level labels, no supervised drone-vs-background training. Just raw RF spectrograms and the hypothesis that drone-ness is real.</p>
+        <p>I wanted to answer a different question: <em>can a model detect drone types it has never seen before?</em> Not a supervised classifier that memorizes training types, but a representation that generalizes to completely unseen drone controllers. I hold out 7 types entirely during training, and test whether the model can detect them zero-shot using nothing but a distance to a single centroid.</p>
 
         <div class="highlight-box">
-            <p><strong>TL;DR:</strong> Yes. IRIS v11 achieves <strong>0.978 AUC</strong> on 7 completely unseen drone types using self-supervised learning, with a detection pipeline that's just one centroid and one threshold.</p>
+            <p><strong>TL;DR:</strong> Yes. IRIS v11 achieves <strong>0.978 AUC</strong> on 7 completely unseen drone types using hierarchical contrastive learning, with a detection pipeline that's just one centroid and one threshold.</p>
         </div>
 
         <div class="side-by-side">
@@ -274,7 +274,7 @@
                 <img src="blog_images/03_umap_polished.png" alt="UMAP embedding of IRIS v11 showing drone cluster vs background">
             </div>
             <div class="text-container">
-                <p>This UMAP tells the whole story. After training on 30 drone types with hierarchical contrastive learning, the embedding space splits into two clean regions: a unified drone cluster (colored) and a background region (grey). The 7 holdout drone types, never seen during training, fall squarely inside the drone cluster. The model didn't memorize training types. It learned the concept of drone-ness.</p>
+                <p>This UMAP tells the whole story. After training on 30 drone types with hierarchical contrastive learning, the embedding space splits into two clean regions: a unified drone cluster (colored) and a background region (grey). The 7 holdout drone types, never seen during training, fall squarely inside the drone cluster. The model didn't memorize training types. It learned a representation where all drones, including unknown ones, cluster together.</p>
             </div>
         </div>
 
@@ -288,7 +288,7 @@
 
         <p>I handle this by synthesizing <strong>matched backgrounds</strong>: for each drone spectrogram, I create a background with the same RF channel noise but the drone signal surgically removed. The only difference between positive and negative samples is the presence or absence of the drone signal itself. It's the hardest possible test, and it's the one that matters for deployment.</p>
 
-        <p>The labeling problem is worth clarifying. I <em>do</em> have type-level labels (I know which drone controller generated each spectrogram, from the data collection protocol). What I <em>don't</em> have is flight-level labels: which individual spectrogram windows contain active drone signals versus pure background. Type labels are free. Flight labels are expensive. My approach uses the free ones and avoids the expensive ones entirely.</p>
+        <p>About labels: I use <em>type-level</em> labels (which drone controller generated each spectrogram) for the hierarchical contrastive loss. These come free from the data collection protocol. What I don't need are <em>flight-level</em> labels (which individual spectrogram windows contain active drone signals versus pure background). The detection pipeline itself, the centroid and threshold, requires no labels at all. You compute the centroid from training embeddings and calibrate the threshold on a validation set.</p>
 
         <hr class="section-break">
 
@@ -311,7 +311,7 @@ centroid = train_embeddings.mean(axis=0)
 cov_inv = np.linalg.inv(np.cov(train_embeddings.T) + 1e-3 * np.eye(D))
 threshold = 25.55  # Youden's J optimal</code></pre>
 
-        <p>One centroid, one threshold. No kNN search, no per-type calibration, no cross-validation scheme. The entire question is whether self-supervised training produces an embedding space where this works.</p>
+        <p>One centroid, one threshold. No kNN search, no per-type calibration, no cross-validation scheme. The entire question is whether the training objective produces an embedding space where this works.</p>
 
         <hr class="section-break">
 
@@ -349,7 +349,7 @@ threshold = 25.55  # Youden's J optimal</code></pre>
 
         <ul>
             <li><strong>Fine-grained loss</strong> (weight 0.7): Same-type drone pairs are strong positives, different types plus backgrounds are negatives. The encoder learns that DJI Phantoms look different from FLYSKY controllers, it just doesn't push them apart.</li>
-            <li><strong>Coarse-grained loss</strong> (weight 0.3): ALL drone types are weak positives, backgrounds are negatives. This pulls the 30 type clusters into one unified drone region. The encoder learns that despite their differences, all drones share something fundamental: drone-ness.</li>
+            <li><strong>Coarse-grained loss</strong> (weight 0.3): ALL drone types are weak positives, backgrounds are negatives. This pulls the 30 type clusters into one unified drone region. The encoder learns that despite their differences, all drones share something fundamental.</li>
         </ul>
 
         <div class="formula">
@@ -370,7 +370,7 @@ threshold = 25.55  # Youden's J optimal</code></pre>
     
     return w_fine * L_fine + w_coarse * L_coarse</code></pre>
 
-        <p>The result: drone-ness is the <em>primary</em> axis of variation, type identity is the <em>secondary</em> axis. Holdout types naturally fall within the drone region because the coarse loss taught the encoder that all drones belong together. The fine loss preserves type sub-structure, keeping the encoder learning discriminative features rather than collapsing everything to a single point.</p>
+        <p>The result: membership in the drone cluster is the <em>primary</em> axis of variation, type identity is the <em>secondary</em> axis. Holdout types naturally fall within the drone region because the coarse loss taught the encoder that all drones belong together. The fine loss preserves type sub-structure, keeping the encoder learning discriminative features rather than collapsing everything to a single point.</p>
 
         <p>The 0.7/0.3 split isn't arbitrary. Fine-grained needs to dominate because it teaches the encoder to extract meaningful RF features. Without it, the coarse loss would just create a binary classifier that might find trivial shortcuts. More coarse weight erodes per-type discrimination; less fails to unify the clusters.</p>
 
@@ -384,13 +384,15 @@ threshold = 25.55  # Youden's J optimal</code></pre>
             \[d_M(z) = \sqrt{(z - \mu_{\text{drone}})^\top \Sigma^{-1} (z - \mu_{\text{drone}})}\]
         </div>
 
-        <p>The threshold is calibrated using Youden's J statistic (maximizing Sensitivity + Specificity - 1). On my validation set: <strong>25.55</strong> with \(J = 0.9978\). The threshold doesn't depend on drone type. It's a single scalar that works for all types, including ones the model has never seen. This is a direct consequence of hierarchical contrastive learning: by merging all drone types into one region, the distance to centroid becomes a type-agnostic measure of drone-ness.</p>
+        <p>The threshold is calibrated using Youden's J statistic (maximizing Sensitivity + Specificity - 1). On my validation set: <strong>25.55</strong> with \(J = 0.9978\). The threshold doesn't depend on drone type. It's a single scalar that works for all types, including ones the model has never seen. This is a direct consequence of hierarchical contrastive learning: by merging all drone types into one region, the distance to centroid becomes a type-agnostic detection score.</p>
 
         <hr class="section-break">
 
         <h3>Results: Zero-Shot on 7 Unseen Types</h3>
 
         <p>Evaluated on 7 drone types completely held out during training, using matched backgrounds (drone signal removed from same RF channel). This is the hardest test and the one most relevant to deployment.</p>
+
+        <p>The point: when new drone types appear, you don't retrain the model or collect new labeled data. The same centroid, built from the 30 training types, already detects them. You just run the encoder and check the distance.</p>
 
         <ul>
             <li><strong>Matched BG AUC: 0.9785</strong></li>
@@ -409,7 +411,7 @@ threshold = 25.55  # Youden's J optimal</code></pre>
             </div>
         </div>
 
-        <p>Five types achieve near-perfect detection (AUC >= 0.9984): RadioMaster BOXER (1.0000), WFLY ET10 (1.0000), JUMPER-T14 (0.9999), JR PROPO XG7 (0.9997), and FUTABA-T10J (0.9984). The two weakest, DJI FPV COMBO (0.9674) and FUTABA-T14SG (0.9656), are still well above practical deployment thresholds. The DJI FPV COMBO is a digital HD video transmitter operating in a fundamentally different RF regime than traditional RC controllers, which likely explains why it sits closer to the boundary of the drone region.</p>
+        <p>Five types achieve near-perfect detection (AUC >= 0.9984): RadioMaster BOXER (1.0000), WFLY ET10 (1.0000), JUMPER-T14 (0.9999), JR PROPO XG7 (0.9997), and FUTABA-T10J (0.9984). The two weakest, DJI FPV COMBO (0.9674) and FUTABA-T14SG (0.9656), are still well above practical deployment thresholds. The DJI FPV COMBO is a digital HD video transmitter operating in a fundamentally different RF regime than traditional RC controllers, which likely explains why it sits closer to the boundary of the drone cluster.</p>
 
         <div class="image-container">
             <img src="blog_images/07_training_evolution.gif" alt="AUC training evolution across epochs" class="resized60">
@@ -418,11 +420,22 @@ threshold = 25.55  # Youden's J optimal</code></pre>
 
         <hr class="section-break">
 
-        <h3>The Artifact Test</h3>
+        <h3>Is the Detection Real?</h3>
 
-        <p>Are we detecting drones, or just artifacts from the matched background synthesis? Matched backgrounds are created by computationally removing the drone signal, so there could be subtle footprints of that removal process.</p>
+        <p>There's a reasonable concern with matched backgrounds: the surgical removal process (estimating a noise floor per frequency bin and replacing signal pixels with noise samples) might leave detectable footprints. If the model is picking up on these footprints rather than the drone signal itself, the AUC is inflated.</p>
 
-        <p>Yes, the model <em>can</em> distinguish matched from random backgrounds (AUC 0.9246). That's expected: matched backgrounds share the RF channel with drones, so they have different channel statistics. But the per-pair test is the definitive check: for each holdout drone, compare its distance to the centroid against its matched background's distance. If the model were detecting artifacts, the matched backgrounds would be closer to the centroid than the drones. But <strong>98.1%</strong> of drones are closer to the centroid than their matched backgrounds. The model is detecting drone signal, not artifacts.</p>
+        <p>I ran a <strong>synthetic surgery test</strong> to check this. Take random background spectrograms where no drone was ever present, and apply the exact same surgical operation used to create matched backgrounds. If the model detects the surgery artifact, these surgically modified random BGs should land near real matched BGs in embedding space. If the model is detecting actual drone signal, the surgery shouldn't matter, because there was no drone signal to begin with.</p>
+
+        <p>The results are clear:</p>
+
+        <ul>
+            <li><strong>Train drones:</strong> mean distance to centroid = 14.86</li>
+            <li><strong>Real matched BG:</strong> mean distance = 39.32</li>
+            <li><strong>Surgically modified random BG:</strong> mean distance = 38.30</li>
+            <li><strong>Original random BG:</strong> mean distance = 55.53</li>
+        </ul>
+
+        <p>The surgery does move random BGs closer to the centroid (55.53 to 38.30), which is why the model can distinguish matched from random backgrounds. But both are still far from drones (14.86). The distance gap between drones and everything else is 2.6x. The model is not confusing backgrounds for drones. The 98.1% per-pair result (drones closer to centroid than their matched backgrounds) holds because the gap between drone and non-drone embeddings is simply too large for the surgery artifact to bridge.</p>
 
         <div class="image-container">
             <img src="blog_images/01_exposure_side_by_side.png" alt="Per-pair artifact validation showing 98.1% of drones closer to centroid" class="resized60">
@@ -436,9 +449,9 @@ threshold = 25.55  # Youden's J optimal</code></pre>
 
         <p><strong>v9 (LeJEPA only):</strong> No contrastive loss. The model learns some representation but it's not organized for detection. Matched BG AUC was <strong>0.30</strong>, barely above random. The UMAP showed drones and backgrounds completely overlapping. The representation existed somewhere in 256 dimensions but there was no geometric structure for a distance-based detector to exploit.</p>
 
-        <p><strong>v10 (+ Standard SupCon):</strong> Big jump to <strong>0.9023</strong> matched AUC. But 30 isolated type clusters with no shared drone region. Holdout types fell into the gaps between clusters. One-centroid detection didn't work. I had to use a complex PCA-kNN-LOTO pipeline that was fragile and philosophically unsatisfying. I wanted drone-ness to be a unified concept, not 30 separate ones.</p>
+        <p><strong>v10 (+ Standard SupCon):</strong> Big jump to <strong>0.9023</strong> matched AUC. But 30 isolated type clusters with no shared drone region. Holdout types fell into the gaps between clusters. One-centroid detection didn't work. I had to use a complex PCA-kNN-LOTO pipeline that was fragile and philosophically unsatisfying. I wanted drone detection to be a unified concept, not 30 separate ones.</p>
 
-        <p><strong>v11 (+ Hierarchical SupCon):</strong> The coarse-grained loss changed everything. <strong>0.9785</strong> matched AUC, the 30 clusters merged into a single drone region, and one-centroid detection finally worked. v10 detected drones by checking proximity to any training type. v11 detects drones by checking proximity to drone-ness itself.</p>
+        <p><strong>v11 (+ Hierarchical SupCon):</strong> The coarse-grained loss changed everything. <strong>0.9785</strong> matched AUC, the 30 clusters merged into a single drone region, and one-centroid detection finally worked. v10 detected drones by checking proximity to any training type. v11 detects drones by checking proximity to the drone cluster as a whole.</p>
 
         <div class="image-container">
             <img src="blog_images/03b_umap_by_type.png" alt="v9 vs v10 vs v11 embedding space evolution">
@@ -452,7 +465,7 @@ threshold = 25.55  # Youden's J optimal</code></pre>
 
         <h3>Limitations and What's Next</h3>
 
-        <p>The two weakest holdout types, DJI FPV COMBO (0.9674) and FUTABA-T14SG (0.9656), represent real failure modes. DJI FPV COMBO is a digital HD video link, not a traditional analog RC controller. It operates in a fundamentally different RF regime, and the model struggles to place it firmly inside the drone region. This suggests drone-ness as learned by v11 is still somewhat biased toward traditional RC controller characteristics.</p>
+        <p>The two weakest holdout types, DJI FPV COMBO (0.9674) and FUTABA-T14SG (0.9656), represent real failure modes. DJI FPV COMBO is a digital HD video link, not a traditional analog RC controller. It operates in a fundamentally different RF regime, and the model struggles to place it firmly inside the drone region. This suggests the learned drone cluster is still somewhat biased toward traditional RC controller characteristics.</p>
 
         <p>About 1.9% of pairs have the matched background closer to the centroid than the drone. These aren't random: they cluster around specific drone types and tend to occur when the drone signal is weak or atypical. Temporal aggregation (combining decisions across multiple spectrogram windows) would likely eliminate most of these.</p>
 
@@ -465,8 +478,6 @@ threshold = 25.55  # Youden's J optimal</code></pre>
         </ul>
 
         <p>The broader implication: hierarchical contrastive learning is a general strategy for zero-shot transfer to unseen subcategories. Drone detection is one application, but the same principle applies anywhere you need to detect a broad class across many sub-categories. If you can define a label hierarchy and have type-level labels, hierarchical SupCon gives you zero-shot generalization.</p>
-
-        <p>Drone-ness is not just a metaphor. It's a latent signal waiting to be discovered, and self-supervised learning with the right training objective can find it.</p>
 
         <p>Will update with the GitHub repo in a few days. Thank you for your time.</p>
 
